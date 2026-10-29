@@ -1,8 +1,9 @@
 {
   "id":"ktor",
   "name":"Ktor",
+  "category":"library",
   "main_class":"dev.mooner.starlightktor.StarlightKtorPlugin",
-  "version":"3.6.0",
+  "version":"3.6.1",
   "api_version":"0.3.2",
   "assetRevision":1,
   "authors":["mooner"],

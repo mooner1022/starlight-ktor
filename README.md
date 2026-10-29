@@ -27,8 +27,11 @@ testImplementation "io.ktor:ktor-server-cio:3.6.0"
 
 ## 버전
 
-플러그인 버전은 포함된 Ktor 버전과 같습니다. Ktor를 올리면 이 플러그인의 `versionName`/`starlight.json`의 `version`과,
+플러그인 버전의 major.minor는 포함된 Ktor 버전과 같습니다. Ktor를 올리면 이 플러그인의 `versionName`/`starlight.json`의 `version`과,
 의존하는 플러그인들의 `compileOnly` 버전과 `dependency`를 함께 올리세요.
+
+patch는 Ktor와 다를 수 있습니다. 플러그인만 바뀐 릴리즈(3.6.1: 메타데이터에 `category` 추가)는 같은 Ktor(3.6.0)를 담은 채 patch만 올립니다.
+StarLight는 의존성 버전의 major.minor만 비교하므로 `ktor@3.6.0`에 의존하는 플러그인은 그대로 동작합니다.
 
 ## 빌드
 
