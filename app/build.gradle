@@ -1,0 +1,62 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+    id 'io.github.mooner1022.slplugin'
+}
+
+android {
+    namespace 'dev.mooner.starlightktor'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "dev.mooner.starlightktor"
+        minSdk 26
+        targetSdk 33
+        versionCode 1
+        // Follows the bundled Ktor version; dependent plugins declare "ktor@<version>".
+        versionName "3.6.0"
+    }
+
+    buildTypes {
+        release {
+            // Every Ktor class must stay: dependent plugins load them from this plugin by name.
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_11.toString()
+    }
+    packaging {
+        resources {
+            // Keeps META-INF/services (SLF4J provider), which is needed at runtime.
+            excludes += ['META-INF/*', 'META-INF/versions/**', 'META-INF/native-image/**', 'META-INF/rewrite/**', 'META-INF/maven/**']
+        }
+    }
+}
+
+starlight {
+    sdk {
+        // Build these from the StarLight repository: ./gradlew :PluginCore:assembleRelease :ConfigDSL:assembleRelease
+        pluginCore = file("libs/PluginCore-release.aar")
+        configDsl = file("libs/ConfigDSL-release.aar")
+        excludeHostKotlinLibraries = true
+    }
+    deploy {
+        // Pass -Pstarlight.device=<serial or ip:port> or set STARLIGHT_DEVICE.
+        // Restarting force-stops StarLight on the device; opt in per run with -Pstarlight.restartApp=true.
+    }
+}
+
+dependencies {
+    // Provided by StarLight at runtime.
+    compileOnly "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0"
+
+    // Shared with dependent plugins, which declare these as compileOnly.
+    // Upgrading Ktor changes the plugin version too, so dependent plugins must be checked against it.
+    api "io.ktor:ktor-server-cio:3.6.0"
+}

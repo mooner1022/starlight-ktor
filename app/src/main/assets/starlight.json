@@ -1,0 +1,10 @@
+{
+  "id":"ktor",
+  "name":"Ktor",
+  "main_class":"dev.mooner.starlightktor.StarlightKtorPlugin",
+  "version":"3.6.0",
+  "api_version":"0.3.2",
+  "assetRevision":1,
+  "authors":["mooner"],
+  "description":"Shared Ktor (CIO server) runtime for other StarLight plugins"
+}
