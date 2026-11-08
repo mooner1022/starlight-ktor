@@ -4,6 +4,9 @@ plugins {
     id 'io.github.mooner1022.slplugin'
 }
 
+// major.minor follows the bundled Ktor; dependent plugins declare "ktor@<major.minor>.0".
+def pluginVersion = "3.6.1"
+
 android {
     namespace 'dev.mooner.starlightktor'
     compileSdk 35
@@ -13,8 +16,7 @@ android {
         minSdk 26
         targetSdk 33
         versionCode 2
-        // Follows the bundled Ktor version; dependent plugins declare "ktor@<version>".
-        versionName "3.6.1"
+        versionName pluginVersion
     }
 
     buildTypes {
@@ -30,6 +32,13 @@ android {
     }
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_11.toString()
+    }
+    testOptions {
+        unitTests.returnDefaultValues = true
+        unitTests.all { test ->
+            // The StarLight SLF4J provider in main needs PluginCore, which tests don't have.
+            test.systemProperty 'slf4j.provider', 'org.slf4j.helpers.NOP_FallbackServiceProvider'
+        }
     }
     packaging {
         resources {
@@ -52,6 +61,19 @@ starlight {
     }
 }
 
+// The API dependent plugins compile against (KtorServers): copy the jar to their app/libs and declare it compileOnly.
+// It includes META-INF/*.kotlin_module, without which top-level functions don't resolve.
+tasks.register('apiJar', Jar) {
+    def compileKotlin = tasks.named('compileReleaseKotlin')
+    dependsOn compileKotlin
+    from(compileKotlin.flatMap { it.destinationDirectory }) {
+        include 'dev/mooner/starlightktor/server/**'
+        include 'META-INF/*.kotlin_module'
+    }
+    archiveFileName = "ktor-api-${pluginVersion}.jar"
+    destinationDirectory = layout.buildDirectory.dir("outputs/api")
+}
+
 dependencies {
     // Provided by StarLight at runtime.
     compileOnly "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0"
@@ -59,4 +81,9 @@ dependencies {
     // Shared with dependent plugins, which declare these as compileOnly.
     // Upgrading Ktor changes the plugin version too, so dependent plugins must be checked against it.
     api "io.ktor:ktor-server-cio:3.6.0"
+
+    testImplementation "junit:junit:4.13.2"
+    // The compiler's stdlib; without it the test classpath settles on the older one Ktor asks for.
+    testImplementation "org.jetbrains.kotlin:kotlin-stdlib:2.4.20"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0"
 }
