@@ -9,20 +9,24 @@
 
 StarLight는 플러그인에 없는 클래스를 다른 플러그인의 클래스 로더에서 찾습니다. 그래서 Ktor를 직접 포함하지 않고 이 플러그인에 의존하면 됩니다.
 
-`starlight.json`:
+`app/build.gradle.kts`(API jar는 이 저장소의 `./gradlew :app:apiJar` 결과물 `app/build/outputs/api/ktor-api-<버전>.jar`):
 
-```json
-"dependency": ["ktor@3.6.0"]
+```kotlin
+starlight {
+    manifest {
+        dependency("ktor", "3.6.0")
+    }
+}
+
+dependencies {
+    compileOnly("io.ktor:ktor-server-cio:3.6.0")
+    compileOnly(files("libs/ktor-api-3.6.2.jar"))
+    testImplementation("io.ktor:ktor-server-cio:3.6.0")
+    testImplementation(files("libs/ktor-api-3.6.2.jar"))
+}
 ```
 
-`app/build.gradle`(API jar는 이 저장소의 `./gradlew :app:apiJar` 결과물 `app/build/outputs/api/ktor-api-<버전>.jar`):
-
-```groovy
-compileOnly "io.ktor:ktor-server-cio:3.6.0"
-compileOnly files("libs/ktor-api-3.6.2.jar")
-testImplementation "io.ktor:ktor-server-cio:3.6.0"
-testImplementation files("libs/ktor-api-3.6.2.jar")
-```
+`starlight.json`을 직접 쓴다면 `"dependency": ["ktor@3.6.0"]`입니다.
 
 - Ktor를 `implementation`으로 직접 포함하지 마세요. 자기 dex의 클래스가 먼저 로드되므로,
   일부 클래스만 이 플러그인 것을 쓰게 되면 같은 이름의 클래스가 두 로더에 생겨 `LinkageError`/`ClassCastException`이 날 수 있습니다.
@@ -82,7 +86,7 @@ StarLight에서 서버를 여는 플러그인은 모두 한 프로세스 안에�
 
 ## 버전
 
-플러그인 버전의 major.minor는 포함된 Ktor 버전과 같습니다. Ktor를 올리면 이 플러그인의 `pluginVersion`(`app/build.gradle`)/`starlight.json`의 `version`과,
+플러그인 버전의 major.minor는 포함된 Ktor 버전과 같습니다. Ktor를 올리면 이 플러그인의 `pluginVersion`(`app/build.gradle.kts`, 생성되는 `starlight.json`의 `version`)과,
 의존하는 플러그인들의 `compileOnly` 버전과 `dependency`를 함께 올리세요.
 
 patch는 Ktor와 다를 수 있습니다. 플러그인만 바뀐 릴리즈는 같은 Ktor(3.6.0)를 담은 채 patch만 올립니다(3.6.1: 메타데이터에 `category` 추가, 3.6.2: `KtorServers`).
